@@ -192,6 +192,22 @@ def test_cli_main_configures_allowed_origins_for_custom_port(tmp_path, monkeypat
         assert excinfo.value.code == 4403
 
 
+def test_cli_main_rejects_port_zero(tmp_path, monkeypatch, capsys):
+    graph_file = tmp_path / "test_graph.json"
+    graph_file.write_text('{"nodes": [], "edges": []}', encoding="utf-8")
+
+    from semantica.explorer import main
+    import uvicorn
+
+    monkeypatch.setattr(uvicorn, "run", lambda *args, **kwargs: None)
+
+    with pytest.raises(SystemExit) as excinfo:
+        main(["--graph", str(graph_file), "--port", "0", "--no-browser"])
+
+    assert excinfo.value.code == 2
+    assert "--port 0 is not supported" in capsys.readouterr().err
+
+
 def test_cli_main_preserves_explicit_allowed_origins(tmp_path, monkeypatch):
     """Ensure explicit ALLOWED_ORIGINS is not overridden when --port is specified."""
     monkeypatch.setenv("SEMANTICA_ALLOW_ANONYMOUS", "true")

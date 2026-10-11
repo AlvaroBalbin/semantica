@@ -49,6 +49,8 @@ def main(argv=None):
         help="Do not open the browser automatically.",
     )
     args = parser.parse_args(argv)
+    if args.port == 0:
+        parser.error("--port 0 is not supported; use a port from 1 to 65535")
 
 
     import os
